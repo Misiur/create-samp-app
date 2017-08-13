@@ -13,7 +13,7 @@ let clean = args.d || args.delete;
 const compiler = args.c || args.compiler;
 const includes = args.i || args.includes;
 const plugins = args.p || args.plugins;
-const mysqlVersion = args.m || args.mysql;
+const mysql = args.m || args.mysql;
 let mysqlStatic = args.ms || args['mysql-static'];
 const targetPath = args['_'][0];
 
@@ -128,7 +128,7 @@ validateChoice('target', target, targets);
 validateChoice('compiler', compiler, compilers);
 validateMultiChoice('includes', includes, allIncludes);
 validateMultiChoice('plugins', plugins, allPlugins);
-validateChoice('mysql', mysqlVersion, allMySQL);
+validateChoice('mysql', mysql, allMySQL);
 
 const questions = {
   target: {
@@ -163,7 +163,7 @@ const questions = {
     message: 'Plugins',
     choices: allPlugins,
   },
-  mysqlVersion: {
+  mysql: {
     type: 'list',
     name: 'mysql',
     message: 'MySQL plugin version',
