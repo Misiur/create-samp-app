@@ -156,6 +156,7 @@ const questions = {
     name: 'includes',
     message: 'Includes',
     choices: allIncludes,
+    when: answers => (answers.target === 'windows' || target === 'windows'),
   },
   plugins: {
     type: 'checkbox',

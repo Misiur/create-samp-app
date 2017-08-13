@@ -23,6 +23,11 @@ const download = (fileUrl, workspace) => {
   });
 };
 
+const extname = (platform) => {
+  return platform === 'windows' ? path.extname : () => '.tar.gz';
+};
+
 module.exports = {
   download,
+  extname,
 };

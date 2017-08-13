@@ -3,8 +3,9 @@ const rimraf = require('rimraf');
 const path = require('path');
 const decompress = require('decompress');
 const pify = require('pify');
-const { download } = require('./util');
+const { download, extname } = require('./util');
 const config = require('./config');
+const sampConfig = require('./sampConfig');
 
 let workspace = null;
 
@@ -120,7 +121,7 @@ const fetchCrashdetect = (platform) => {
   const url = config.PLUGINS.crashdetect[platform];
 
   const pack = path.join(workspace, path.basename(url));
-  const unpacked = path.join(workspace, path.basename(url, path.extname(url)));
+  const unpacked = path.join(workspace, path.basename(url, extname(platform)(url)));
   const pluginsDir = path.join(workspace, 'plugins');
   const includesDir = path.join(workspace, 'pawno', 'include');
 
@@ -143,7 +144,6 @@ const unpackServer = (target, pack) => {
       fs.unlink(pack, () => {});
 
       if (target !== 'windows') {
-        console.log('Secondary unpacking for linux');
         const unnecessaryFolder = path.join(workspace, 'samp03');
         return pify(fs.copy)(unnecessaryFolder, workspace)
           .then(() => pify(rimraf)(unnecessaryFolder))
@@ -201,59 +201,69 @@ module.exports.process = async (values) => {
   }
 
   console.log('Downloading server');
-  //  await downloadServer(url);
+  await downloadServer(url);
   console.log('Server downloaded, unpacking');
-  //  await unpackServer(values.target, path.join(workspace, path.basename(url)));
+  await unpackServer(values.target, path.join(workspace, path.basename(url)));
 
   if (values.delete) {
     console.log('Clearing bundled filterscripts, includes and scriptfiles');
-    //  await deleteJunk();
+    await deleteJunk();
     console.log('Cleared');
   }
 
   if (values.target === 'windows') {
     if (values.compiler === 'none') {
       console.log('Removing pawno');
-      //  await deletePawno();
+      await deletePawno();
       console.log('Removed');
     } else if (values.compiler === 'zeex') {
       console.log('Fetching and unpacking Zeex\'s compiler');
-      //  await fetchZeex();
+      await fetchZeex();
       console.log('Unpacked');
     }
-  }
 
-  if (values.includes) {
-    if (values.includes.includes('ysi')) {
-      console.log('Fetching YSI');
-      //  await fetchYSI();
-      console.log('YSI loaded');
+    if (values.includes) {
+      if (values.includes.includes('ysi')) {
+        console.log('Fetching YSI');
+        await fetchYSI();
+        console.log('YSI loaded');
+      }
     }
   }
 
   if (values.plugins) {
     if (values.plugins.includes('streamer')) {
       console.log('Fetching streamer');
-      //  await fetchStreamer(values.target);
+      await fetchStreamer(values.target);
       console.log('Streamer fetched');
     }
 
     if (values.plugins.includes('mysql')) {
       console.log(`Fetching MySQL ${values.mysql}`);
-       await fetchMySQL(values.mysql, values.target, values['mysql-static']);
+      await fetchMySQL(values.mysql, values.target, values['mysql-static']);
       console.log('MySQL fetched');
     }
 
     if (values.plugins.includes('crashdetect')) {
       console.log('Fetching crashdetect');
-      //  await fetchCrashdetect(values.target);
+      await fetchCrashdetect(values.target);
       console.log('Crashdetect fetched');
     }
 
     if (values.plugins.includes('sscanf')) {
       console.log('Fetching sscanf');
-      //  await fetchSscanf(values.target);
+      await fetchSscanf(values.target);
       console.log('Sscanf fetched');
     }
   }
+
+  let plugins = values.plugins;
+  if (values.target !== 'windows') {
+    plugins = values.plugins.map(plugin => `${plugin}.so`);
+  }
+
+  fs
+    .createWriteStream(path.join(workspace, 'server.cfg'))
+    .write(sampConfig(plugins.join(' ')))
+  ;
 };
