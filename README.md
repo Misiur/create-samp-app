@@ -12,7 +12,7 @@ Available flags:
 -i, --includes         Includes
 -p, --plugins          Plugins
 -m, --mysql            Mysql plugin version
--ms, --mysql-static    Use statically compiled mysql plugin (linux only)
+-s, --mysql-static    Use statically compiled mysql plugin (linux only)
 ```
 
 Programmatic access:

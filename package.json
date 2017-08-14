@@ -14,7 +14,7 @@
     "gta:sa"
   ],
   "bin": {
-    "create-samp-app": "src/index.js"
+    "create-samp-app": "src/cli.js"
   },
   "author": "Misiur",
   "license": "MIT",

@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+global.CLI = true;
+
 const inquirer = require('inquirer');
 const parseArgs = require('minimist');
 
