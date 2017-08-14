@@ -9,13 +9,13 @@ const values = {};
 const args = parseArgs(process.argv.slice(2));
 const help = args.h || args.help;
 const target = args.t || args.target;
-let clean = args.d || args.delete;
+const clean = args.d || args.delete;
 const compiler = args.c || args.compiler;
 const includes = args.i || args.includes;
 const plugins = args.p || args.plugins;
 const mysql = args.m || args.mysql;
-let mysqlStatic = args.ms || args['mysql-static'];
-const targetPath = args['_'][0];
+const mysqlStatic = args.ms || args['mysql-static'];
+const targetPath = args._[0];
 
 if (help) {
   console.log('Available flags:');
@@ -121,7 +121,7 @@ if (typeof mysqlStatic !== 'undefined') {
 }
 
 if (typeof clean !== 'undefined') {
-  values['delete'] = !!clean;
+  values.delete = !!clean;
 }
 
 validateChoice('target', target, targets);

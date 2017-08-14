@@ -1,5 +1,3 @@
-const http = require('http');
-const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
@@ -9,8 +7,8 @@ const download = (fileUrl, workspace) => {
   const parsed = url.parse(fileUrl);
   const filename = path.basename(parsed.pathname);
 
-  return new Promise((resolve) => {
-    return request
+  return new Promise(resolve =>
+    request
       .get(fileUrl)
       .on('error', (err) => {
         throw err;
@@ -18,14 +16,10 @@ const download = (fileUrl, workspace) => {
       .pipe(fs.createWriteStream(path.join(workspace, filename)))
       .on('finish', () => {
         resolve();
-      })
-    ;
-  });
+      }));
 };
 
-const extname = (platform) => {
-  return platform === 'windows' ? path.extname : () => '.tar.gz';
-};
+const extname = platform => (platform === 'windows' ? path.extname : () => '.tar.gz');
 
 module.exports = {
   download,

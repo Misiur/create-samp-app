@@ -9,9 +9,7 @@ const sampConfig = require('./sampConfig');
 
 let workspace = null;
 
-const downloadServer = (url) => {
-  return download(url, workspace);
-};
+const downloadServer = url => download(url, workspace);
 
 const fetchZeex = () => {
   const url = config.COMPILERS.zeex;
@@ -25,12 +23,10 @@ const fetchZeex = () => {
       path.join(unpacked, 'bin'),
       path.join(workspace, 'pawno')
     ))
-    .then(() => {
-      return Promise.all([
-        pify(fs.unlink)(pack),
-        pify(rimraf)(unpacked)
-      ]);
-    });
+    .then(() => Promise.all([
+      pify(fs.unlink)(pack),
+      pify(rimraf)(unpacked),
+    ]))
   ;
 };
 
@@ -129,18 +125,16 @@ const fetchCrashdetect = (platform) => {
     .then(() => decompress(pack, workspace))
     .then(() => pify(fs.copy)(unpacked, pluginsDir))
     .then(() => pify(fs.move)(path.join(pluginsDir, 'crashdetect.inc'), path.join(includesDir, 'crashdetect.inc')))
-    .then(() => {
-      return Promise.all([
-        pify(fs.unlink)(pack),
-        pify(rimraf)(unpacked),
-      ]);
-    })
+    .then(() => Promise.all([
+      pify(fs.unlink)(pack),
+      pify(rimraf)(unpacked),
+    ]))
   ;
 };
 
-const unpackServer = (target, pack) => {
-  return decompress(pack, workspace)
-    .then((files) => {
+const unpackServer = (target, pack) =>
+  decompress(pack, workspace)
+    .then(() => {
       fs.unlink(pack, () => {});
 
       if (target !== 'windows') {
@@ -153,10 +147,9 @@ const unpackServer = (target, pack) => {
       return null;
     })
   ;
-};
 
 const deleteJunk = () => {
-  let promises = [];
+  const promises = [];
   const folders = ['filterscripts', 'gamemodes', 'include', 'scriptfiles'];
   for (let i = 0; i !== folders.length; ++i) {
     const folder = path.join(workspace, folders[i]);
@@ -172,9 +165,8 @@ const deleteJunk = () => {
   ;
 };
 
-const deletePawno = () => {
-  return pify(rimraf)(path.join(workspace, 'pawno'));
-};
+const deletePawno = () =>
+  pify(rimraf)(path.join(workspace, 'pawno'));
 
 module.exports.createWorkspace = (targetPath) => {
   try {
