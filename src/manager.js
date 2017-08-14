@@ -113,13 +113,8 @@ const fetchMySQL = (version, platform, staticLib) => {
 };
 
 const fetchSscanf = (platform) => {
-  let url = null;
-
-  if (platform === 'windows') {
-    url = config.PLUGINS.sscanf[platform];
-  } else {
-    url = config.PLUGINS.sscanf[platform];
-  }
+  const type = platform === 'windows' ? 'windows' : 'linux';
+  const url = config.PLUGINS.sscanf[type];
 
   const pack = path.join(workspace, path.basename(url));
 
@@ -130,7 +125,8 @@ const fetchSscanf = (platform) => {
 };
 
 const fetchCrashdetect = (platform) => {
-  const url = config.PLUGINS.crashdetect[platform];
+  const type = platform === 'windows' ? 'windows' : 'linux';
+  const url = config.PLUGINS.crashdetect[type];
 
   const pack = path.join(workspace, path.basename(url));
   const unpacked = path.join(workspace, path.basename(url, extname(platform)(url)));
