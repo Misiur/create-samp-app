@@ -9,12 +9,14 @@ const sampConfig = require('./sampConfig');
 
 let workspace = null;
 
-let log = () => {};
-let error = () => {};
-if (global.CLI === true) {
-  log = console.log.bind(console);
-  error = console.error.bind(console);
-}
+// let log = () => {};
+// let error = () => {};
+// if (global.CLI === true) {
+//   log = console.log.bind(console);
+//   error = console.error.bind(console);
+// }
+const log = console.log.bind(console);
+const error = console.error.bind(console);
 
 const downloadServer = url => download(url, workspace);
 
@@ -181,7 +183,11 @@ module.exports.createWorkspace = (targetPath) => {
   try {
     fs.mkdirSync(workspace);
   } catch (e) {
-    throw new Error(`"${workspace}" already exists`);
+    const files = fs.readdirSync(workspace);
+
+    if (files.length) {
+      throw new Error(`"${workspace}" already exists and is not empty`);
+    }
   }
 
   if (!fs.existsSync(workspace)) {
@@ -232,7 +238,7 @@ module.exports.process = (values) => new Promise(async (resolve) => {
     }
 
     let pluginsString = '';
-
+    console.log('WAT', values);
     if (values.plugins) {
       const plugins = values.plugins;
 

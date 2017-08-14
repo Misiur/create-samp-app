@@ -13,7 +13,6 @@ module.exports = (path, config) => {
     compiler: 'standard',
     includes: [],
     plugins: [],
-    mysql: null,
     'mysql-static': false,
   };
 
