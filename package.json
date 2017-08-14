@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "build": "pkg . --out-path=build",
+    "windows": "pkg . --target node7-win-x64 --output build/create-samp-app.exe",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

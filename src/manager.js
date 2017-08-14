@@ -9,6 +9,11 @@ const sampConfig = require('./sampConfig');
 
 let workspace = null;
 
+let log = () => {};
+if (global.CLI === true) {
+  log = console.log.bind(console);
+}
+
 const downloadServer = url => download(url, workspace);
 
 const fetchZeex = () => {
@@ -169,93 +174,97 @@ const deletePawno = () =>
   pify(rimraf)(path.join(workspace, 'pawno'));
 
 module.exports.createWorkspace = (targetPath) => {
-  try {
-    fs.mkdirSync(targetPath);
-  } catch (e) {
-    // return -1;
-  }
-
-  if (!fs.existsSync(targetPath)) {
-    return -2;
-  }
-
   workspace = path.resolve(targetPath);
+
+  try {
+    fs.mkdirSync(workspace);
+  } catch (e) {
+    throw new Error(`"${workspace}" already exists`);
+  }
+
+  if (!fs.existsSync(workspace)) {
+    throw new Error(`Failed to create folder "${workspace}"`);
+  }
 
   return workspace;
 };
 
 module.exports.process = async (values) => {
-  let url = null;
-  if (values.target === 'windows') {
-    url = config.SERVER_URL.windows;
-  } else {
-    url = config.SERVER_URL.linux;
-  }
-
-  console.log('Downloading server');
-  await downloadServer(url);
-  console.log('Server downloaded, unpacking');
-  await unpackServer(values.target, path.join(workspace, path.basename(url)));
-
-  if (values.delete) {
-    console.log('Clearing bundled filterscripts, includes and scriptfiles');
-    await deleteJunk();
-    console.log('Cleared');
-  }
-
-  if (values.target === 'windows') {
-    if (values.compiler === 'none') {
-      console.log('Removing pawno');
-      await deletePawno();
-      console.log('Removed');
-    } else if (values.compiler === 'zeex') {
-      console.log('Fetching and unpacking Zeex\'s compiler');
-      await fetchZeex();
-      console.log('Unpacked');
+  try {
+    let url = null;
+    if (values.target === 'windows') {
+      url = config.SERVER_URL.windows;
+    } else {
+      url = config.SERVER_URL.linux;
     }
 
-    if (values.includes) {
-      if (values.includes.includes('ysi')) {
-        console.log('Fetching YSI');
-        await fetchYSI();
-        console.log('YSI loaded');
+    log('Downloading server');
+    await downloadServer(url);
+    log('Server downloaded, unpacking');
+    await unpackServer(values.target, path.join(workspace, path.basename(url)));
+
+    if (values.delete) {
+      log('Clearing bundled filterscripts, includes and scriptfiles');
+      await deleteJunk();
+      log('Cleared');
+    }
+
+    if (values.target === 'windows') {
+      if (values.compiler === 'none') {
+        log('Removing pawno');
+        await deletePawno();
+        log('Removed');
+      } else if (values.compiler === 'zeex') {
+        log('Fetching and unpacking Zeex\'s compiler');
+        await fetchZeex();
+        log('Unpacked');
+      }
+
+      if (values.includes) {
+        if (values.includes.includes('ysi')) {
+          log('Fetching YSI');
+          await fetchYSI();
+          log('YSI loaded');
+        }
       }
     }
+
+    if (values.plugins) {
+      if (values.plugins.includes('streamer')) {
+        log('Fetching streamer');
+        await fetchStreamer(values.target);
+        log('Streamer fetched');
+      }
+
+      if (values.plugins.includes('mysql')) {
+        log(`Fetching MySQL ${values.mysql}`);
+        await fetchMySQL(values.mysql, values.target, values['mysql-static']);
+        log('MySQL fetched');
+      }
+
+      if (values.plugins.includes('crashdetect')) {
+        log('Fetching crashdetect');
+        await fetchCrashdetect(values.target);
+        log('Crashdetect fetched');
+      }
+
+      if (values.plugins.includes('sscanf')) {
+        log('Fetching sscanf');
+        await fetchSscanf(values.target);
+        log('Sscanf fetched');
+      }
+    }
+
+    let plugins = values.plugins;
+    if (values.target !== 'windows') {
+      plugins = values.plugins.map(plugin => `${plugin}.so`);
+    }
+
+    fs
+      .createWriteStream(path.join(workspace, 'server.cfg'))
+      .write(sampConfig(plugins.join(' ')))
+    ;
+  } catch (e) {
+    console.error(e);
   }
-
-  if (values.plugins) {
-    if (values.plugins.includes('streamer')) {
-      console.log('Fetching streamer');
-      await fetchStreamer(values.target);
-      console.log('Streamer fetched');
-    }
-
-    if (values.plugins.includes('mysql')) {
-      console.log(`Fetching MySQL ${values.mysql}`);
-      await fetchMySQL(values.mysql, values.target, values['mysql-static']);
-      console.log('MySQL fetched');
-    }
-
-    if (values.plugins.includes('crashdetect')) {
-      console.log('Fetching crashdetect');
-      await fetchCrashdetect(values.target);
-      console.log('Crashdetect fetched');
-    }
-
-    if (values.plugins.includes('sscanf')) {
-      console.log('Fetching sscanf');
-      await fetchSscanf(values.target);
-      console.log('Sscanf fetched');
-    }
-  }
-
-  let plugins = values.plugins;
-  if (values.target !== 'windows') {
-    plugins = values.plugins.map(plugin => `${plugin}.so`);
-  }
-
-  fs
-    .createWriteStream(path.join(workspace, 'server.cfg'))
-    .write(sampConfig(plugins.join(' ')))
-  ;
 };
