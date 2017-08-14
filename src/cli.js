@@ -136,7 +136,7 @@ const missingValues = Object
 
 inquirer.prompt(missingValues)
   .then((answers) => {
-    const all = Object.assign({}, answers, inputs);
+    const all = Object.assign({}, inputs, answers);
 
     return manager.process(all, true);
   })

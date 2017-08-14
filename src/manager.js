@@ -97,6 +97,13 @@ const fetchMySQL = (version, platform, staticLib) => {
         return pify(fs.copy)(unpacked, workspace)
           .then(() => pify(rimraf)(unpacked))
         ;
+      } else if (version === 'r41') {
+        const name = path.basename(url, path.extname(url));
+        const unpacked = path.join(workspace, name);
+
+        return pify(fs.copy)(unpacked, workspace)
+          .then(() => pify(rimraf)(unpacked))
+        ;
       }
 
       return null;
@@ -238,7 +245,7 @@ module.exports.process = (values) => new Promise(async (resolve) => {
     }
 
     let pluginsString = '';
-    console.log('WAT', values);
+
     if (values.plugins) {
       const plugins = values.plugins;
 
