@@ -32,8 +32,6 @@ module.exports = (path, config) => {
   }
 
   manager.createWorkspace(path);
-  manager.process(options);
-
-  return true;
+  return manager.process(options);
 };
 

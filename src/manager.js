@@ -10,8 +10,10 @@ const sampConfig = require('./sampConfig');
 let workspace = null;
 
 let log = () => {};
+let error = () => {};
 if (global.CLI === true) {
   log = console.log.bind(console);
+  error = console.error.bind(console);
 }
 
 const downloadServer = url => download(url, workspace);
@@ -189,7 +191,7 @@ module.exports.createWorkspace = (targetPath) => {
   return workspace;
 };
 
-module.exports.process = async (values) => {
+module.exports.process = (values) => new Promise(async (resolve) => {
   try {
     let url = null;
     if (values.target === 'windows') {
@@ -229,42 +231,48 @@ module.exports.process = async (values) => {
       }
     }
 
+    let pluginsString = '';
+
     if (values.plugins) {
-      if (values.plugins.includes('streamer')) {
+      const plugins = values.plugins;
+
+      if (plugins.includes('streamer')) {
         log('Fetching streamer');
         await fetchStreamer(values.target);
         log('Streamer fetched');
       }
 
-      if (values.plugins.includes('mysql')) {
+      if (plugins.includes('mysql')) {
         log(`Fetching MySQL ${values.mysql}`);
         await fetchMySQL(values.mysql, values.target, values['mysql-static']);
         log('MySQL fetched');
       }
 
-      if (values.plugins.includes('crashdetect')) {
+      if (plugins.includes('crashdetect')) {
         log('Fetching crashdetect');
         await fetchCrashdetect(values.target);
         log('Crashdetect fetched');
       }
 
-      if (values.plugins.includes('sscanf')) {
+      if (plugins.includes('sscanf')) {
         log('Fetching sscanf');
         await fetchSscanf(values.target);
         log('Sscanf fetched');
       }
-    }
 
-    let plugins = values.plugins;
-    if (values.target !== 'windows') {
-      plugins = values.plugins.map(plugin => `${plugin}.so`);
+      if (values.target !== 'windows') {
+        pluginsString = plugins.map(plugin => `${plugin}.so`).join(' ');
+      }
     }
 
     fs
       .createWriteStream(path.join(workspace, 'server.cfg'))
-      .write(sampConfig(plugins.join(' ')))
+      .write(sampConfig(pluginsString))
     ;
+
+    resolve();
   } catch (e) {
-    console.error(e);
+    error(e);
+    throw e;
   }
-};
+});

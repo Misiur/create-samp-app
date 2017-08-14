@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 global.CLI = true;
 
 const inquirer = require('inquirer');
@@ -133,8 +134,13 @@ const missingValues = Object
   .map(k => questions[k])
 ;
 
-inquirer.prompt(missingValues).then((answers) => {
-  const all = Object.assign({}, answers, inputs);
+inquirer.prompt(missingValues)
+  .then((answers) => {
+    const all = Object.assign({}, answers, inputs);
 
-  manager.process(all, true);
-});
+    return manager.process(all, true);
+  })
+  .then(() => {
+    console.log('All finished');
+  })
+;
