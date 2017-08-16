@@ -1,6 +1,6 @@
 {
   "name": "create-samp-app",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Utility for fast server creation",
   "main": "src/index.js",
   "scripts": {
