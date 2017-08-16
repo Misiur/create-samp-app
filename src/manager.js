@@ -271,6 +271,8 @@ module.exports.process = (values) => new Promise(async (resolve) => {
 
       if (values.target !== 'windows') {
         pluginsString = plugins.map(plugin => `${plugin}.so`).join(' ');
+      } else {
+        pluginsString = plugins.join(' ');
       }
     }
 
